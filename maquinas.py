@@ -69,12 +69,12 @@ class MaquinaProductiva:
         if (self.proximo_termino_produccion != float("inf")):
             return 0  # maquina ocupada
         if (cantidad < self.produccion_minima):
-            return 0
+            return 0 # no piden suficiente produccion
         elif (cantidad > self.produccion_maxima):
             tiempo_produccion = expovariate(1/self.tasa)
             self.cantidad_ultima_produccion = self.produccion_maxima
             self.proximo_termino_produccion = tiempo_inicio + tiempo_produccion
-            return self.cantidad_ultima_produccion
+            return self.cantidad_ultima_produccion # solo produzco el maximo
         else:
             tiempo_produccion = expovariate(1/self.tasa)
             self.cantidad_ultima_produccion = cantidad
@@ -86,11 +86,14 @@ class MaquinaProductiva:
         if self.cola_anterior:
             cantidad_a_pedir = min(self.cola_anterior.producto_disponible(
             ), self.cola_siguiente.capacidad_disponible())
+            # pido el minimo entre lo que tengo de "materia prima" en la cola anterior
+            # y la capacidad que le queda al estanque que debe recibir mi produccion
 
             produccion = self.producir(cantidad_a_pedir, tiempo_inicio)
             self.cola_anterior.quitar_contenido(produccion)
         else:
             cantidad_a_pedir = self.cola_siguiente.capacidad_disponible()
+            # pido la capacidad que le queda al estanque que debe recibir mi produccion
             produccion = self.producir(cantidad_a_pedir, tiempo_inicio)
 
         return produccion > 0
@@ -247,7 +250,7 @@ class Camaras:
         proxima_camara = self.camara_proxima_apertura()
         tiempo_retorno = proxima_camara.tiempo_proxima_apertura
         proxima_camara.finalizar_estabilizacion()
-        return tiempo_retorno
+        return tiempo_retorno # tiempo que se debe agregar a la cola de eventos
 
     def __str__(self):
         s = ''
