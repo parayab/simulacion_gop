@@ -4,9 +4,9 @@ import producto
 from maquinas import Estanque, Camaras, MaquinaProductiva
 
 '''SUPUESTOS:
-- Las cámaras solo se cierran y comienzan a estabilizar si están a máxima capacidad
-- Las máquinas solo funcionan si es con cierta capacidad sobre un mínimo
-- El producto que no alcanza a procesar una máquina se pierde
+- Las camaras solo se cierran y comienzan a estabilizar si estan a maxima capacidad
+- Las maquinas solo funcionan si es con cierta capacidad sobre un minimo
+- El producto que no alcanza a procesar una maquina se pierde
 - Productos tienen envasado y embolsado, a menos que se demuestre lo contrario >:(
 '''
 
@@ -17,14 +17,14 @@ TIEMPO_SIMULACION = 4500  # EN MINUTOS
 class Simulacion:
 
     def __init__(self, tiempo_maximo):
-        # Necesarios simulación
+        # Necesarios simulacion
         self.tiempo_maximo = tiempo_maximo
         self.tiempo_actual = 0
 
         # Estadisticas
         self.kilos_terminados = 0
 
-        # Máquinas:
+        # Maquinas:
         self.coolmix = MaquinaProductiva(
             tasa=tasas.COOLMIX, produccion_maxima=produccion.COOLMIX_MAX, produccion_minima=produccion.COOLMIX_MIN, cola_anterior=False)
 
@@ -91,9 +91,9 @@ class Simulacion:
             return proxima_maquina
 
     def simular(self):
-        self.coolmix.intentar_producir(self.tiempo_actual)  # produce al máximo
+        self.coolmix.intentar_producir(self.tiempo_actual)  # produce al maximo
 
-        # Mientras haya eventos en la lista y el tiempo de simulación no termine
+        # Mientras haya eventos en la lista y el tiempo de simulacion no termine
         while(self.tiempo_actual < self.tiempo_maximo):
 
             # Encontrar proximo evento
@@ -104,7 +104,7 @@ class Simulacion:
                     print(maquina.cola_siguiente)
             print("\n\n")
             nuevo_tiempo = maquina_lista.simular()
-            # Avanzar el tiempo de simulación al tiempo del evento
+            # Avanzar el tiempo de simulacion al tiempo del evento
             self.tiempo_actual = nuevo_tiempo
 
             for maquina in self.maquinas:

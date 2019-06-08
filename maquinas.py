@@ -57,15 +57,20 @@ class MaquinaProductiva:
         self.produccion_total = 0
         self.proximo_termino_produccion = float("inf")
 
-        # al intentar producir se toma de cola anterior y al termino de la producción se deposita en cola siguiente
+        # al intentar producir se toma de cola anterior y al termino de la produccion se deposita en cola siguiente
         self.cola_anterior = cola_anterior
         self.cola_siguiente = False
+
+        # estadisticas de una maquina:
+        self.tiempo_trabajando = 0 # cantidad de tiempo que la maquina esta trabajando
+        self.quiebres_stock_input = 0 # cantidad veces que la maquina quiere producir y no puede por falta de stock
+        self.quiebres_cola_siguiente = 0 # cantidad de veces que la maquina quiere producir y no puede por falta de espacio en la cola siguiente
 
     def asignar_cola_siguiente(self, cola_siguiente):
         self.cola_siguiente = cola_siguiente
 
     def producir(self, cantidad, tiempo_inicio):
-        # retorna la cantidad efectivamente producida por la máquina
+        # retorna la cantidad efectivamente producida por la maquina
         if (self.proximo_termino_produccion != float("inf")):
             return 0  # maquina ocupada
         if (cantidad < self.produccion_minima):
@@ -82,7 +87,7 @@ class MaquinaProductiva:
             return self.cantidad_ultima_produccion
 
     def intentar_producir(self, tiempo_inicio):
-        # tener cudiado al elegir dsitribucion para que no de cero la cantidad a producir.
+        # tener cuidado al elegir dsitribucion para que no de cero la cantidad a producir.
         if self.cola_anterior:
             cantidad_a_pedir = min(self.cola_anterior.producto_disponible(
             ), self.cola_siguiente.capacidad_disponible())
@@ -115,7 +120,7 @@ class MaquinaProductiva:
 
 class Camara:
     def __init__(self, camara_id, cantidad_horas_producto, peso_por_carro_producto):
-        # Supuesto: siempre trabaja a capacidad máxima
+        # Supuesto: siempre trabaja a capacidad maxima
         self.id = camara_id
         self.cantidad_horas_producto = cantidad_horas_producto
         self.capacidad = 42 * peso_por_carro_producto
@@ -127,7 +132,7 @@ class Camara:
         self.tiempo_proxima_apertura = float("inf")
 
     def agregar_contenido(self, cantidad, tiempo):
-        # retorna la cantidad efectivamente añadida a la cámara
+        # retorna la cantidad efectivamente añadida a la camara
         contenido_agregado = 0
         if (self.contenido_actual + cantidad <= self.capacidad):
             self.contenido_actual += cantidad
@@ -176,7 +181,7 @@ class Camara:
 
 
 class Camaras:
-    # 6 cámaras, 42 carros por cámara, 90 bandejas por carro -> Kilos por carro
+    # 6 camaras, 42 carros por camara, 90 bandejas por carro -> Kilos por carro
     def __init__(self, cantidad_horas_producto, peso_por_carro_producto):
         self.camaras = [Camara(i, cantidad_horas_producto,
                                peso_por_carro_producto) for i in range(6)]
