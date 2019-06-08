@@ -153,7 +153,7 @@ class Camara:
         else:
             disponible = self.contenido_actual
             self.contenido_actual = 0
-            self.estabilizado = False
+            self.estabilizado = False # Si se queda con cero contenido => ya no hay producto estabilizado
             return disponible
 
     def recibiendo_producto(self):
@@ -206,6 +206,7 @@ class Camaras:
         return camara_por_abrir
 
     def proxima_camara_disponible(self):
+        # siguiente camara que puede recibir producto
         for camara in self.camaras:
             if camara.recibiendo_producto() and camara.capacidad_disponible() > 0:
                 return camara
