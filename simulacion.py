@@ -26,40 +26,40 @@ class Simulacion:
 
         # Maquinas:
         self.coolmix = MaquinaProductiva(
-            tasa=tasas.COOLMIX, produccion_maxima=produccion.COOLMIX_MAX, produccion_minima=produccion.COOLMIX_MIN, cola_anterior=False)
+            tasa=tasas.COOLMIX, produccion_maxima=produccion.COOLMIX_MAX, produccion_minima=produccion.COOLMIX_MIN, cola_anterior=False, nombre="Coolmix")
 
         self.estanque_pulmon_crudo = Estanque(
             capacidad_maxima=1500, tiempo_maximo=None)
 
         self.fegama = MaquinaProductiva(
-            tasa=tasas.FEGAMA, produccion_maxima=produccion.FEGAMA_MAX, produccion_minima=produccion.FEGAMA_MIN, cola_anterior=self.estanque_pulmon_crudo)
+            tasa=tasas.FEGAMA, produccion_maxima=produccion.FEGAMA_MAX, produccion_minima=produccion.FEGAMA_MIN, cola_anterior=self.estanque_pulmon_crudo, nombre="Fegama")
 
         self.pick = MaquinaProductiva(
-            tasa=tasas.PICK, produccion_maxima=produccion.PICK_MAX, produccion_minima=produccion.PICK_MIN, cola_anterior=self.estanque_pulmon_crudo)
+            tasa=tasas.PICK, produccion_maxima=produccion.PICK_MAX, produccion_minima=produccion.PICK_MIN, cola_anterior=self.estanque_pulmon_crudo, nombre="Pick")
 
         self.estanque_pulmon_cocido = Estanque(
             capacidad_maxima=1200, tiempo_maximo=3)
 
         self.nid_1 = MaquinaProductiva(
-            tasa=tasas.NID_1, produccion_maxima=produccion.NID_1, produccion_minima=produccion.NID_1, cola_anterior=self.estanque_pulmon_cocido)
+            tasa=tasas.NID_1, produccion_maxima=produccion.NID_1, produccion_minima=produccion.NID_1, cola_anterior=self.estanque_pulmon_cocido, nombre="Nid parte 1")
 
         self.camaras = Camaras(cantidad_horas_producto=producto.HORAS_EN_CAMARA,
                                peso_por_carro_producto=producto.PESO_POR_CARRO)
 
         self.nid_2 = MaquinaProductiva(
-            tasa=tasas.NID_1, produccion_maxima=produccion.NID_1, produccion_minima=produccion.NID_1, cola_anterior=self.camaras)
+            tasa=tasas.NID_1, produccion_maxima=produccion.NID_1, produccion_minima=produccion.NID_1, cola_anterior=self.camaras, nombre="Nid parte 2")
 
         self.estanque_envasado = Estanque(
             capacidad_maxima=float("inf"), tiempo_maximo=None)
 
         self.envasadora = MaquinaProductiva(
-            tasa=tasas.ENVASADORA, produccion_maxima=produccion.ENVASADORA, produccion_minima=produccion.ENVASADORA, cola_anterior=self.estanque_envasado)
+            tasa=tasas.ENVASADORA, produccion_maxima=produccion.ENVASADORA, produccion_minima=produccion.ENVASADORA, cola_anterior=self.estanque_envasado, nombre="Envasadora-Nagema")
 
         self.estanque_embolsado = Estanque(
             capacidad_maxima=float("inf"), tiempo_maximo=None)
 
         self.embolsadora = MaquinaProductiva(
-            tasa=tasas.EMBOLSADORA, produccion_maxima=produccion.EMBOLSADORA, produccion_minima=produccion.EMBOLSADORA, cola_anterior=self.estanque_embolsado)
+            tasa=tasas.EMBOLSADORA, produccion_maxima=produccion.EMBOLSADORA, produccion_minima=produccion.EMBOLSADORA, cola_anterior=self.estanque_embolsado, nombre="Embolsado")
 
         self.estanque_finalizados = Estanque(
             capacidad_maxima=float("inf"), tiempo_maximo=None)
@@ -98,11 +98,11 @@ class Simulacion:
 
             # Encontrar proximo evento
             maquina_lista = self.buscar_proximo_termino_produccion()
-            for maquina in self.maquinas:
-                print(maquina)
-                if maquina.cola_siguiente:
-                    print(maquina.cola_siguiente)
-            print("\n\n")
+            # for maquina in self.maquinas:
+            #     print(maquina)
+            #     if maquina.cola_siguiente:
+            #         print(maquina.cola_siguiente)
+            # print("\n\n")
             nuevo_tiempo = maquina_lista.simular()
             # Avanzar el tiempo de simulacion al tiempo del evento
             self.tiempo_actual = nuevo_tiempo
@@ -110,6 +110,10 @@ class Simulacion:
             for maquina in self.maquinas:
                 maquina.intentar_producir(self.tiempo_actual)
 
+        print("Estadísticas de la simulación:")
+        for maquina in self.maquinas:
+            print(maquina.estadisticas())
+            print(maquina.cola_siguiente.estadisticas())
 
 simulacion = Simulacion(TIEMPO_SIMULACION)  # EN minutos
 simulacion.simular()
