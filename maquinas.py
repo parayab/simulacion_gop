@@ -1,4 +1,5 @@
 from random import expovariate
+import numpy as np
 
 
 class Estanque:
@@ -54,7 +55,7 @@ class Estanque:
 class MaquinaProductiva:
     ID = 0
 
-    def __init__(self, tasa, produccion_maxima, produccion_minima, cola_anterior, nombre):
+    def __init__(self, produccion_maxima, produccion_minima, cola_anterior, nombre, triangular_min, triangular_max, triangular_moda):
         """
         tasa: tiempo que puede demorar la maquina en hacer un lote 
         la producción de la máquina está entre producción mínima y producción máxima según cuando le pidan
@@ -64,9 +65,14 @@ class MaquinaProductiva:
         self.id = MaquinaProductiva.ID
         self.nombre = nombre
         MaquinaProductiva.ID += 1
-        self.tasa = tasa
         self.produccion_maxima = produccion_maxima
         self.produccion_minima = produccion_minima
+
+        # datos variabilidad: tiempo que se demora en hacer produccion_maxima
+        self.triangular_min= triangular_min
+        self.triangular_max = triangular_max
+        self.triangular_moda = triangular_moda
+
         # cantidad producida en el ultimo lote
         self.cantidad_ultima_produccion = 0
         self.produccion_total = 0
@@ -95,6 +101,13 @@ class MaquinaProductiva:
             else:
                 self.no_produce_por_falta_de_espacio_output += 1
 
+    def calcular_tiempo_produccion(self):
+        # supuesto: lineal entre 0 y tiempo de produccion maxima
+        cantidad = self.cantidad_ultima_produccion
+        tiempo_estandar = np.random.triangular(self.triangular_min, self.triangular_moda, self.triangular_max)
+        tiempo_produccion = (tiempo_estandar * self.produccion_maxima) / cantidad
+        return tiempo_produccion
+
     def producir(self, cantidad, tiempo_inicio):
         # retorna la cantidad efectivamente producida por la maquina
         if (self.proximo_termino_produccion != float("inf")):
@@ -105,15 +118,15 @@ class MaquinaProductiva:
         elif (cantidad > self.produccion_maxima):
             # me piden mas que lo que puedo producir
             self.demanda_no_satisfecha += cantidad - self.produccion_maxima
-            tiempo_produccion = expovariate(1/self.tasa)
             self.cantidad_ultima_produccion = self.produccion_maxima
+            tiempo_produccion = self.calcular_tiempo_produccion()
             self.proximo_termino_produccion = tiempo_inicio + tiempo_produccion
             self.tiempo_trabajando += tiempo_produccion
             return self.cantidad_ultima_produccion  # solo produzco el maximo
         else:
             # me piden una cantidad entre mi minimo y mi maximo
-            tiempo_produccion = expovariate(1/self.tasa)
             self.cantidad_ultima_produccion = cantidad
+            tiempo_produccion = self.calcular_tiempo_produccion()
             self.proximo_termino_produccion = tiempo_inicio + tiempo_produccion
             self.tiempo_trabajando += tiempo_produccion
             return self.cantidad_ultima_produccion
