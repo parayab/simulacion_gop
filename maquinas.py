@@ -159,8 +159,8 @@ class Camara:
     def __init__(self, camara_id, cantidad_horas_producto, peso_por_carro_producto):
         # Supuesto: siempre trabaja a capacidad maxima
         self.id = camara_id
-        self.cantidad_horas_producto = cantidad_horas_producto
-        self.capacidad = 42 * peso_por_carro_producto
+        self.cantidad_minutos_producto = cantidad_horas_producto * 60 # Pasarlo a minutos
+        self.capacidad = 42 * peso_por_carro_producto # 42 carros con cierto peso
         # disponible inidica si la camara esta abierta o en proceso de estabilizacion
         self.disponible = True
         # estabilizado indica si el producto al interior ya fue estabilizado o no
@@ -186,9 +186,9 @@ class Camara:
         return contenido_agregado
 
     def estabilizar_producto(self, tiempo_inicio):
-        self.tiempo_proxima_apertura = tiempo_inicio + self.cantidad_horas_producto
+        self.tiempo_proxima_apertura = tiempo_inicio + self.cantidad_minutos_producto
         self.disponible = False
-        self.tiempo_trabajando = self.cantidad_horas_producto
+        self.tiempo_trabajando = self.cantidad_minutos_producto
 
     def finalizar_estabilizacion(self):
         self.produccion_total += self.contenido_actual
@@ -311,7 +311,7 @@ class Camaras:
             estadisticas = camara.estadisticas()
             total_horas_trabajando += estadisticas["tiempo_trabajando"]
             produccion_total_camaras += estadisticas["produccion_total"]
-        return "Cámaras:\n\tDemanda no satisfecha: {0} kilos\n\tCantidad que las cámaras no pudieron recibir: {1}kilos\n\tTiempo total trabajando (cámara cerrada): {2} minutos\n\tProducción total: {3} kilos".format(self.demanda_no_satisfecha, self.capacidad_faltante, total_horas_trabajando, produccion_total_camaras)
+        return "Cámaras:\n\tDemanda no satisfecha: {0} kilos\n\tCantidad que las cámaras no pudieron recibir: {1} kilos\n\tTiempo total trabajando (cámara cerrada): {2} minutos\n\tProducción total: {3} kilos".format(self.demanda_no_satisfecha, self.capacidad_faltante, total_horas_trabajando, produccion_total_camaras)
         # return {"demanda_no_satisfecha": self.demanda_no_satisfecha, "capacidad_faltante": self.capacidad_faltante, "tiempo_trabajando": total_horas_trabajando, "produccion_total": produccion_total_camaras}
 
     def __str__(self):

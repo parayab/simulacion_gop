@@ -8,6 +8,7 @@ from maquinas import Estanque, Camaras, MaquinaProductiva
 - Las maquinas solo funcionan si es con cierta capacidad sobre un minimo
 - El producto que no alcanza a procesar una maquina se pierde
 - Productos tienen envasado y embolsado, a menos que se demuestre lo contrario >:(
+- Cambiar la linea 75: self.fegama => self.pick cuando se cocina con pick
 '''
 
 # MEGA ATENCION CON LA NID, envasadora y embolsadora por las unidades!!!
