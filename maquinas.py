@@ -44,7 +44,7 @@ class Estanque:
             return disponible
 
     def estadisticas(self):
-        return "Cola de id {0}\n\tDemanda no satisfecha: {1} kilos\n\tCapacidad faltante: {2} kilos".format(self.id, self.demanda_no_satisfecha, self.capacidad_faltante)
+        return "Cola de id {0}\n\tDemanda no satisfecha: {1} kilos\n\tCapacidad faltante: {2} kilos\n\tContenido actual: {3}/{4}".format(self.id, self.demanda_no_satisfecha, self.capacidad_faltante, self.contenido_actual, self.capacidad_maxima)
         # return {"demanda_no_satisfecha": self.demanda_no_satisfecha, "capacidad_faltante": self.capacidad_faltante}
 
     def __str__(self):
@@ -55,6 +55,12 @@ class MaquinaProductiva:
     ID = 0
 
     def __init__(self, tasa, produccion_maxima, produccion_minima, cola_anterior, nombre):
+        """
+        tasa: tiempo que puede demorar la maquina en hacer un lote 
+        la producción de la máquina está entre producción mínima y producción máxima según cuando le pidan
+        Aún no se incorpora variabilidad
+        cola_anterior: estanque del cual la máquina saca 'materia prima'
+        """
         self.id = MaquinaProductiva.ID
         self.nombre = nombre
         MaquinaProductiva.ID += 1

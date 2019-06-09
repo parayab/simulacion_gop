@@ -10,7 +10,7 @@ from maquinas import Estanque, Camaras, MaquinaProductiva
 - Productos tienen envasado y embolsado, a menos que se demuestre lo contrario >:(
 '''
 
-# MEGA ATENCION CON LA NID, envasadora y embolsadora!!!
+# MEGA ATENCION CON LA NID, envasadora y embolsadora por las unidades!!!
 TIEMPO_SIMULACION = 4500  # EN MINUTOS
 
 
