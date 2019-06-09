@@ -54,7 +54,11 @@ class Simulacion:
             triangular_min=tasas.NID_1_TRIANGULAR_MIN, triangular_max=tasas.NID_1_TRIANGULAR_MAX, triangular_moda=tasas.NID_1_TRIANGULAR_MODA)
 
         self.camaras = Camaras(cantidad_horas_producto=producto.HORAS_EN_CAMARA,
-                               peso_por_carro_producto=producto.PESO_POR_CARRO)
+                               peso_por_carro_producto=producto.PESO_POR_CARRO,
+                               triangular_min=tasas.CAMARAS_TRIANGULAR_MIN,
+                               triangular_max=tasas.CAMARAS_TRIANGULAR_MAX,
+                               triangular_moda=tasas.CAMARAS_TRIANGULAR_MODA
+                               )
 
         self.nid_2 = MaquinaProductiva(
             produccion_maxima=produccion.NID_2_MAX, produccion_minima=produccion.NID_2_MIN,
@@ -131,12 +135,12 @@ class Simulacion:
 
 produccion_total = []
 
-for i in range(100):
+for i in range(1000):
     simulacion = Simulacion(TIEMPO_SIMULACION)  # EN minutos
     produccion_i = simulacion.simular()
     produccion_total.append(produccion_i)
 
-print("Estadisticas simulacion")
+print("Estadisticas 1000 simulaciones")
 print(np.mean(np.array(produccion_total)))
 print(np.std(np.array(produccion_total)))
-print(produccion_total)
+# print(produccion_total)

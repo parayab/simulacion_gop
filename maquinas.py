@@ -169,7 +169,7 @@ class MaquinaProductiva:
 
 
 class Camara:
-    def __init__(self, camara_id, cantidad_horas_producto, peso_por_carro_producto):
+    def __init__(self, camara_id, cantidad_horas_producto, peso_por_carro_producto, triangular_min, triangular_max, triangular_moda):
         # Supuesto: siempre trabaja a capacidad maxima
         self.id = camara_id
         self.cantidad_minutos_producto = cantidad_horas_producto * 60 # Pasarlo a minutos
@@ -180,6 +180,11 @@ class Camara:
         self.estabilizado = False
         self.contenido_actual = 0
         self.tiempo_proxima_apertura = float("inf")
+
+        # Variabilidad camara
+        self.triangular_min = triangular_min * 60
+        self.triangular_max = triangular_max * 60
+        self.triangular_moda = triangular_moda * 60
 
         #Estadisticas:
         self.tiempo_trabajando = 0
@@ -197,11 +202,17 @@ class Camara:
         if (self.capacidad_completa()):
             self.estabilizar_producto(tiempo)
         return contenido_agregado
+    
+    def calcular_tiempo_produccion(self):
+        # supuesto: lineal entre 0 y tiempo de produccion maxima
+        tiempo_produccion = np.random.triangular(self.triangular_min, self.triangular_moda, self.triangular_max)
+        return tiempo_produccion
 
     def estabilizar_producto(self, tiempo_inicio):
-        self.tiempo_proxima_apertura = tiempo_inicio + self.cantidad_minutos_producto
+        tiempo_produccion = self.calcular_tiempo_produccion()
+        self.tiempo_proxima_apertura = tiempo_inicio + tiempo_produccion
         self.disponible = False
-        self.tiempo_trabajando = self.cantidad_minutos_producto
+        self.tiempo_trabajando += tiempo_produccion
 
     def finalizar_estabilizacion(self):
         self.produccion_total += self.contenido_actual
@@ -242,9 +253,9 @@ class Camara:
 
 class Camaras:
     # 6 camaras, 42 carros por camara, 90 bandejas por carro -> Kilos por carro
-    def __init__(self, cantidad_horas_producto, peso_por_carro_producto):
+    def __init__(self, cantidad_horas_producto, peso_por_carro_producto, triangular_max, triangular_min, triangular_moda):
         self.camaras = [Camara(i, cantidad_horas_producto,
-                               peso_por_carro_producto) for i in range(6)]
+                               peso_por_carro_producto, triangular_min, triangular_max, triangular_moda) for i in range(6)]
         self.capacidad_faltante = 0
         self.demanda_no_satisfecha = 0
 
