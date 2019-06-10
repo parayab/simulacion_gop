@@ -1,4 +1,5 @@
 from random import expovariate
+import numpy as np
 
 
 class Estanque:
@@ -54,7 +55,7 @@ class Estanque:
 class MaquinaProductiva:
     ID = 0
 
-    def __init__(self, tasa, produccion_maxima, produccion_minima, cola_anterior, nombre):
+    def __init__(self, produccion_maxima, produccion_minima, cola_anterior, nombre, triangular_min, triangular_max, triangular_moda):
         """
         tasa: tiempo que puede demorar la maquina en hacer un lote 
         la producción de la máquina está entre producción mínima y producción máxima según cuando le pidan
@@ -64,9 +65,14 @@ class MaquinaProductiva:
         self.id = MaquinaProductiva.ID
         self.nombre = nombre
         MaquinaProductiva.ID += 1
-        self.tasa = tasa
         self.produccion_maxima = produccion_maxima
         self.produccion_minima = produccion_minima
+
+        # datos variabilidad: tiempo que se demora en hacer produccion_maxima
+        self.triangular_min= triangular_min
+        self.triangular_max = triangular_max
+        self.triangular_moda = triangular_moda
+
         # cantidad producida en el ultimo lote
         self.cantidad_ultima_produccion = 0
         self.produccion_total = 0
@@ -95,6 +101,13 @@ class MaquinaProductiva:
             else:
                 self.no_produce_por_falta_de_espacio_output += 1
 
+    def calcular_tiempo_produccion(self):
+        # supuesto: lineal entre 0 y tiempo de produccion maxima
+        cantidad = self.cantidad_ultima_produccion
+        tiempo_estandar = np.random.triangular(self.triangular_min, self.triangular_moda, self.triangular_max)
+        tiempo_produccion = (tiempo_estandar * self.produccion_maxima) / cantidad
+        return tiempo_produccion
+
     def producir(self, cantidad, tiempo_inicio):
         # retorna la cantidad efectivamente producida por la maquina
         if (self.proximo_termino_produccion != float("inf")):
@@ -105,15 +118,15 @@ class MaquinaProductiva:
         elif (cantidad > self.produccion_maxima):
             # me piden mas que lo que puedo producir
             self.demanda_no_satisfecha += cantidad - self.produccion_maxima
-            tiempo_produccion = expovariate(1/self.tasa)
             self.cantidad_ultima_produccion = self.produccion_maxima
+            tiempo_produccion = self.calcular_tiempo_produccion()
             self.proximo_termino_produccion = tiempo_inicio + tiempo_produccion
             self.tiempo_trabajando += tiempo_produccion
             return self.cantidad_ultima_produccion  # solo produzco el maximo
         else:
             # me piden una cantidad entre mi minimo y mi maximo
-            tiempo_produccion = expovariate(1/self.tasa)
             self.cantidad_ultima_produccion = cantidad
+            tiempo_produccion = self.calcular_tiempo_produccion()
             self.proximo_termino_produccion = tiempo_inicio + tiempo_produccion
             self.tiempo_trabajando += tiempo_produccion
             return self.cantidad_ultima_produccion
@@ -156,17 +169,22 @@ class MaquinaProductiva:
 
 
 class Camara:
-    def __init__(self, camara_id, cantidad_horas_producto, peso_por_carro_producto):
+    def __init__(self, camara_id, cantidad_horas_producto, peso_por_carro_producto, triangular_min, triangular_max, triangular_moda):
         # Supuesto: siempre trabaja a capacidad maxima
         self.id = camara_id
-        self.cantidad_horas_producto = cantidad_horas_producto
-        self.capacidad = 42 * peso_por_carro_producto
+        self.cantidad_minutos_producto = cantidad_horas_producto * 60 # Pasarlo a minutos
+        self.capacidad = 42 * peso_por_carro_producto # 42 carros con cierto peso
         # disponible inidica si la camara esta abierta o en proceso de estabilizacion
         self.disponible = True
         # estabilizado indica si el producto al interior ya fue estabilizado o no
         self.estabilizado = False
         self.contenido_actual = 0
         self.tiempo_proxima_apertura = float("inf")
+
+        # Variabilidad camara
+        self.triangular_min = triangular_min * 60
+        self.triangular_max = triangular_max * 60
+        self.triangular_moda = triangular_moda * 60
 
         #Estadisticas:
         self.tiempo_trabajando = 0
@@ -184,11 +202,17 @@ class Camara:
         if (self.capacidad_completa()):
             self.estabilizar_producto(tiempo)
         return contenido_agregado
+    
+    def calcular_tiempo_produccion(self):
+        # supuesto: lineal entre 0 y tiempo de produccion maxima
+        tiempo_produccion = np.random.triangular(self.triangular_min, self.triangular_moda, self.triangular_max)
+        return tiempo_produccion
 
     def estabilizar_producto(self, tiempo_inicio):
-        self.tiempo_proxima_apertura = tiempo_inicio + self.cantidad_horas_producto
+        tiempo_produccion = self.calcular_tiempo_produccion()
+        self.tiempo_proxima_apertura = tiempo_inicio + tiempo_produccion
         self.disponible = False
-        self.tiempo_trabajando = self.cantidad_horas_producto
+        self.tiempo_trabajando += tiempo_produccion
 
     def finalizar_estabilizacion(self):
         self.produccion_total += self.contenido_actual
@@ -229,9 +253,9 @@ class Camara:
 
 class Camaras:
     # 6 camaras, 42 carros por camara, 90 bandejas por carro -> Kilos por carro
-    def __init__(self, cantidad_horas_producto, peso_por_carro_producto):
+    def __init__(self, cantidad_horas_producto, peso_por_carro_producto, triangular_max, triangular_min, triangular_moda):
         self.camaras = [Camara(i, cantidad_horas_producto,
-                               peso_por_carro_producto) for i in range(6)]
+                               peso_por_carro_producto, triangular_min, triangular_max, triangular_moda) for i in range(6)]
         self.capacidad_faltante = 0
         self.demanda_no_satisfecha = 0
 
@@ -311,7 +335,7 @@ class Camaras:
             estadisticas = camara.estadisticas()
             total_horas_trabajando += estadisticas["tiempo_trabajando"]
             produccion_total_camaras += estadisticas["produccion_total"]
-        return "Cámaras:\n\tDemanda no satisfecha: {0} kilos\n\tCantidad que las cámaras no pudieron recibir: {1}kilos\n\tTiempo total trabajando (cámara cerrada): {2} minutos\n\tProducción total: {3} kilos".format(self.demanda_no_satisfecha, self.capacidad_faltante, total_horas_trabajando, produccion_total_camaras)
+        return "Cámaras:\n\tDemanda no satisfecha: {0} kilos\n\tCantidad que las cámaras no pudieron recibir: {1} kilos\n\tTiempo total trabajando (cámara cerrada): {2} minutos\n\tProducción total: {3} kilos".format(self.demanda_no_satisfecha, self.capacidad_faltante, total_horas_trabajando, produccion_total_camaras)
         # return {"demanda_no_satisfecha": self.demanda_no_satisfecha, "capacidad_faltante": self.capacidad_faltante, "tiempo_trabajando": total_horas_trabajando, "produccion_total": produccion_total_camaras}
 
     def __str__(self):
